@@ -1,8 +1,11 @@
+import { useContextStore } from "@/Context/ContextApi";
 import { LinkIcon } from "lucide-react"
 import { Link } from "react-router-dom"
 
 
 function NavBar() {
+      const {token }=useContextStore();
+  
   return (
     <div>
          <header className="border-b bg-background">

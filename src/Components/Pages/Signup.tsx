@@ -4,29 +4,59 @@ import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { Button } from "../ui/button";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { SubmitHandler, useForm } from "react-hook-form";
+import { useState } from "react";
+import axios from "axios";
+import { toast } from "sonner";
+import { baseUrl } from "@/main";
 
 type Inputs = {
   username: string;
   email: string;
-  password: string;
   role: string;
+  password: string;
 };
 
 function Signup() {
+  const [loading,setLoading]=useState(false);
   const { register, handleSubmit,setValue,watch, formState: { errors } } = useForm<Inputs>({
     defaultValues: {
       role: "ROLE_USER", // Set default value for role
     },}); 
-  const onSubmit: SubmitHandler<Inputs> = (data) => {
+    const navigate=useNavigate();
+  const onSubmit: SubmitHandler<Inputs> = async(data) => {
     // const formData = new FormData();
     // formData.append("username", data.username);
     // formData.append("email", data.email);
     // formData.append("password", data.password);
     // formData.append("role", data.role); // Allow role selection
+    const formattedData = {
+      ...data,
+      role: [data.role], 
+    };
 
-    console.log(data);
+    // console.log(formattedData);
+
+    //add the logic
+    setLoading(true);
+    try {
+     const response=await axios.post(`${baseUrl}/auth/user/register`,formattedData,  {
+      headers:{
+          "Content-Type":"application/json"
+      },
+      withCredentials:true,
+    })
+    console.log(response)
+      navigate("/login");
+      toast.success("User Register successfully !!!")
+
+    } catch (error:any) {
+      console.log(error)
+      toast.error(error.message);
+    } finally{
+      setLoading(false);
+    }
   };
 
   return (
@@ -81,7 +111,10 @@ function Signup() {
             </div>
 
             <Button type="submit" className="w-full bg-green-800 cursor-pointer">
-              Create account
+              {
+                loading?"Loading....":"Create account"
+              }
+              
             </Button>
           </form>
         </CardContent>
