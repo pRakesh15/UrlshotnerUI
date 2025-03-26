@@ -24,6 +24,18 @@ import { useContextStore } from '@/Context/ContextApi'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { baseUrl } from '@/main'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '../ui/dialog';
+import { Label } from '../ui/label';
+import { Input } from '../ui/input';
+import { SubmitHandler, useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 
 // Define the type for our URL click data
 interface UrlClickData {
@@ -38,9 +50,15 @@ interface DateRange {
   from: Date;
   to: Date;
 }
+type Inputs = {
+  originalUrl: string;
+};
 
 const UrlAnalyticsDashboard: React.FC = () => {
   const [loading, setLoading] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const { register, handleSubmit, formState: { errors } } = useForm<Inputs>();
+
   const [data, setData] = useState<UrlClickData[]>()
   const [dateRange, setDateRange] = useState<DateRange>({
     from: new Date(new Date().setDate(new Date().getDate() - 7)),
@@ -52,6 +70,7 @@ const UrlAnalyticsDashboard: React.FC = () => {
     navigate("/login")
   }
 
+  //function for get the anylisis data
   const fetchUrlAnalytics = async () => {
     try {
 
@@ -90,7 +109,7 @@ const UrlAnalyticsDashboard: React.FC = () => {
     fetchUrlAnalytics();
   }, [])
 
-
+   //handel select data
   const handleFromDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setDateRange(prev => ({
       ...prev,
@@ -103,6 +122,32 @@ const UrlAnalyticsDashboard: React.FC = () => {
       ...prev,
       to: new Date(e.target.value)
     }))
+  }
+
+  //create a function for add url's
+  const onSubmit: SubmitHandler<Inputs> = async(data) => {
+    setLoading(true);
+    try {
+     const response=await axios.post(`${baseUrl}/urls/shorter`,data,  {
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        Authorization: `Bearer ${token}`, // Attach Bearer token
+      },
+      withCredentials:true,
+    })
+    console.log(response)
+    const shortUrl=`http://localhost:5173/${response?.data?.sortUrl}`
+         navigator.clipboard.writeText(shortUrl).then(()=>{
+          toast.success("Short url copy to clipboard  !!!")
+         })
+         setIsDialogOpen(false);
+    } catch (error:any) {
+      console.log(error)
+      toast.error(error.message);
+    } finally{
+      setLoading(false);
+    }
   }
 
   return (
@@ -142,7 +187,7 @@ const UrlAnalyticsDashboard: React.FC = () => {
           wrapperStyle={{}}
           wrapperClass="flex items-center justify-center"
           visible={true}
-        />) : (data?.length===0 ?( <div className="flex items-center justify-center p-6 bg-gray-50 rounded-lg border border-gray-200">
+        />) : (data?.length === 0 ? (<div className="flex items-center justify-center p-6 bg-gray-50 rounded-lg border border-gray-200">
           <div className="text-center">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto mb-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 005.656 0M9 12a4 4 0 01-4-4V6h4M15 12a4 4 0 004 4v2h-4M15 12a4 4 0 00-4-4V8h4" />
@@ -150,7 +195,7 @@ const UrlAnalyticsDashboard: React.FC = () => {
             <h2 className="text-xl font-semibold text-gray-600 mb-2">No Data Available</h2>
             <p className="text-gray-500">There is currently no data to analyze.</p>
           </div>
-        </div>):(<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        </div>) : (<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Card>
             <CardHeader>
               <CardTitle>Daily URL Clicks - Bar Chart</CardTitle>
@@ -192,9 +237,38 @@ const UrlAnalyticsDashboard: React.FC = () => {
       }
 
       <div className=' p-2 flex justify-center mt-7'>
-        <Button className='bg-purple-900 text-white p-5'>
-          Create a new short url
-        </Button>
+
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger><Button
+           onClick={() => setIsDialogOpen(true)}
+          className='bg-purple-900 text-white p-5'>
+            Create a new short url
+          </Button></DialogTrigger>
+          <DialogContent className='bg-black text-white'>
+
+            <DialogTitle>Create short ulr</DialogTitle>
+            <DialogDescription>
+              Add your uls for create a short Url.
+            </DialogDescription>
+            <DialogHeader>
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="username">originalUrl</Label>
+                  <Input id="username" placeholder="johndoe" {...register("originalUrl", { required: "originalUrl is required" })} />
+                  {errors.originalUrl && <span className="text-red-500">{errors.originalUrl.message}</span>}
+                </div>
+
+
+                <Button type="submit" className="w-full bg-green-800 cursor-pointer">
+                  {
+                    loading ? "Loading...." : "Create"
+                  }
+
+                </Button>
+              </form>
+            </DialogHeader>
+          </DialogContent>
+        </Dialog>
       </div>
       {/* here we can add a component that show the  list of all urls.... */}
     </div>
