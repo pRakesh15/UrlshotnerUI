@@ -36,6 +36,7 @@ import { Label } from '../ui/label';
 import { Input } from '../ui/input';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
+import UrlCard from '../SubComponents/UrlCard';
 
 // Define the type for our URL click data
 interface UrlClickData {
@@ -54,10 +55,22 @@ type Inputs = {
   originalUrl: string;
 };
 
+
+interface UrlData {
+  id: number
+  originalUrl: string
+  sortUrl: string
+  clickCount: number
+  createdDate: string
+  username: string
+}
+
+
 const UrlAnalyticsDashboard: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { register, handleSubmit, formState: { errors } } = useForm<Inputs>();
+  const [urlData, setUrlData] = useState<UrlData[]>()
 
   const [data, setData] = useState<UrlClickData[]>()
   const [dateRange, setDateRange] = useState<DateRange>({
@@ -68,6 +81,20 @@ const UrlAnalyticsDashboard: React.FC = () => {
   const { token } = useContextStore();
   if (!token) {
     navigate("/login")
+  }
+  //handel select data
+  const handleFromDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setDateRange(prev => ({
+      ...prev,
+      from: new Date(e.target.value)
+    }))
+  }
+
+  const handleToDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setDateRange(prev => ({
+      ...prev,
+      to: new Date(e.target.value)
+    }))
   }
 
   //function for get the anylisis data
@@ -105,50 +132,63 @@ const UrlAnalyticsDashboard: React.FC = () => {
       setLoading(false);
     }
   };
-  useEffect(() => {
-    fetchUrlAnalytics();
-  }, [])
 
-   //handel select data
-  const handleFromDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setDateRange(prev => ({
-      ...prev,
-      from: new Date(e.target.value)
-    }))
-  }
+  //create a function for  get all url of a user
 
-  const handleToDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setDateRange(prev => ({
-      ...prev,
-      to: new Date(e.target.value)
-    }))
-  }
-
-  //create a function for add url's
-  const onSubmit: SubmitHandler<Inputs> = async(data) => {
-    setLoading(true);
+  const fetchUrlOfAUser = async () => {
     try {
-     const response=await axios.post(`${baseUrl}/urls/shorter`,data,  {
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-        Authorization: `Bearer ${token}`, // Attach Bearer token
-      },
-      withCredentials:true,
-    })
-    console.log(response)
-    const shortUrl=`http://localhost:5173/${response?.data?.sortUrl}`
-         navigator.clipboard.writeText(shortUrl).then(()=>{
-          toast.success("Short url copy to clipboard  !!!")
-         })
-         setIsDialogOpen(false);
-    } catch (error:any) {
-      console.log(error)
-      toast.error(error.message);
-    } finally{
+      setLoading(true)
+      const response = await axios.get<UrlData[]>(
+        `${baseUrl}/urls/myUrls`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            Authorization: `Bearer ${token}`, // Attach Bearer token
+          },
+        }
+      );
+      setUrlData(response?.data);
+    } catch (error) {
+      console.error("Error fetching analytics:", error);
+    } finally {
       setLoading(false);
     }
   }
+
+
+  //create a function for add url's
+  const onSubmit: SubmitHandler<Inputs> = async (data) => {
+    setLoading(true);
+    try {
+      const response = await axios.post(`${baseUrl}/urls/shorter`, data, {
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          Authorization: `Bearer ${token}`, // Attach Bearer token
+        },
+        withCredentials: true,
+      })
+      console.log(response)
+      const shortUrl = `http://localhost:5173/${response?.data?.sortUrl}`
+      navigator.clipboard.writeText(shortUrl).then(() => {
+        toast.success("Short url copy to clipboard  !!!")
+      })
+      setIsDialogOpen(false);
+      fetchUrlOfAUser();
+    } catch (error: any) {
+      console.log(error)
+      toast.error(error.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+
+  useEffect(() => {
+    fetchUrlAnalytics();
+    fetchUrlOfAUser()
+  }, [])
 
   return (
     <div className="container mx-auto p-6 bg-gray-50 min-h-screen">
@@ -238,10 +278,10 @@ const UrlAnalyticsDashboard: React.FC = () => {
 
       <div className=' p-2 flex justify-center mt-7'>
 
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger><Button
-           onClick={() => setIsDialogOpen(true)}
-          className='bg-purple-900 text-white p-5'>
+            onClick={() => setIsDialogOpen(true)}
+            className='bg-purple-900 text-white p-5'>
             Create a new short url
           </Button></DialogTrigger>
           <DialogContent className='bg-black text-white'>
@@ -271,6 +311,25 @@ const UrlAnalyticsDashboard: React.FC = () => {
         </Dialog>
       </div>
       {/* here we can add a component that show the  list of all urls.... */}
+      {
+        loading?(<Audio
+          height="80"
+          width="80"
+          color="#085759"
+          ariaLabel="bars-loading"
+          wrapperStyle={{}}
+          wrapperClass="flex items-center justify-center"
+          visible={true}
+        />):(<div>
+          {
+            urlData?.map((url) => (
+              <UrlCard key={url.id} {...url} />
+            ))
+          }
+        </div>)
+      }
+      
+
     </div>
   )
 }
