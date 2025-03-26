@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { ExternalLink, Calendar, BarChart3 } from "lucide-react"
 import { Button } from "../ui/button"
+import PersonalAnalysisModal from "./PersonalAnalysisModal"
 
 interface UrlCardProps {
   id: number
@@ -16,30 +17,25 @@ interface UrlCardProps {
 
 export default function UrlCard({
   id = 5,
-  originalUrl = "https://testingurl.com",
-  sortUrl = "LHJ4HJYX",
-  clickCount = 0,
-  createdDate = "2024-12-29T00:00:00.000Z",
-  username = "ankit",
-}: Partial<UrlCardProps>) {
+  originalUrl,
+  sortUrl,
+  clickCount,
+  createdDate,
+}: UrlCardProps) {
   const [copied, setCopied] = useState(false)
+  const [open, setOpen] = useState(false)
+  const [shortUrl, setShortUrl] = useState("");
 
   const baseUrl = "url.localhost:5173"
-  const fullShortUrl = `${baseUrl}/${sortUrl}`
+  const fullShortUrl = sortUrl ? `${baseUrl}/${sortUrl}` : "No URL Available";
 
   const copyToClipboard = () => {
-    navigator.clipboard
-      .writeText(fullShortUrl)
-      .then(() => {
-        setCopied(true)
-        // You could add a toast notification here if you have a toast system
-        setTimeout(() => setCopied(false), 2000)
-      })
-      .catch((err) => {
-        console.error("Failed to copy: ", err)
-        // Handle error case
-      })
-  }
+    if (!sortUrl) return;
+    navigator.clipboard.writeText(fullShortUrl).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }).catch((err) => console.error("Failed to copy:", err));
+  };
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
@@ -49,11 +45,17 @@ export default function UrlCard({
       year: "numeric",
     })
   }
+  //create a onclick function for open the urlAnalysis modal ..
+
+  const handelOpenModal = () => {
+    setShortUrl(sortUrl);
+    setOpen(true)
+  }
 
   return (
     <div className="w-full bg-slate-300 rounded-md p-4 m-4 ">
       <div className="flex flex-col space-y-2">
-      <div>#{id}</div>
+        <div>#{id ?? "N/A"}</div>
         <div className="flex items-center">
           <h3 className="text-blue-600 font-medium">{fullShortUrl}</h3>
           <ExternalLink className="h-4 w-4 ml-2 text-blue-600" />
@@ -85,9 +87,8 @@ export default function UrlCard({
           <div className="flex space-x-2">
             <Button
               onClick={copyToClipboard}
-              className={`${
-                copied ? "bg-green-600 hover:bg-green-700" : "bg-purple-600 hover:bg-purple-800"
-              } text-white px-4 py-2 rounded-md flex items-center transition-colors duration-200`}
+              className={`${copied ? "bg-green-600 hover:bg-green-700" : "bg-purple-600 hover:bg-purple-800"
+                } text-white px-4 py-2 rounded-md flex items-center transition-colors duration-200 cursor-pointer`}
             >
               {copied ? "Copied!" : "Copy"}
               {copied ? (
@@ -102,10 +103,14 @@ export default function UrlCard({
               )}
             </Button>
 
-            <Button className="bg-blue-700 hover:bg-blue-900 text-white px-4 py-2 rounded-md flex items-center">
+            {/* when we click on this button we can pass the short url's  */}
+            <Button
+              onClick={handelOpenModal}
+              className="bg-blue-700 hover:bg-blue-900 text-white px-4 py-2 rounded-md flex items-center cursor-pointer">
               Analytics
               <BarChart3 className="h-4 w-4 ml-1" />
             </Button>
+            <PersonalAnalysisModal open={open} setOpen={setOpen} shortUrl={shortUrl} />
           </div>
         </div>
       </div>

@@ -281,7 +281,7 @@ const UrlAnalyticsDashboard: React.FC = () => {
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger><Button
             onClick={() => setIsDialogOpen(true)}
-            className='bg-purple-900 text-white p-5'>
+            className='bg-purple-900 text-white p-5 cursor-pointer'>
             Create a new short url
           </Button></DialogTrigger>
           <DialogContent className='bg-black text-white'>
