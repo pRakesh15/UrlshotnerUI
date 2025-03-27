@@ -63,7 +63,7 @@ function PersonalAnalysisModal({ open, setOpen, shortUrl }: UrlProps) {
     }
 
     //function for get the anylisis data
-    const fetchUrlAnalytics = async () => {
+    const fetchUrlAnalyticsofPersional = async () => {
         try {
 
             setLoading(true)
@@ -95,7 +95,7 @@ function PersonalAnalysisModal({ open, setOpen, shortUrl }: UrlProps) {
     };
 
     useEffect(()=>{
-        fetchUrlAnalytics();
+        fetchUrlAnalyticsofPersional();
     },[open])
 
     // console.log(shortUrl)
@@ -130,7 +130,7 @@ function PersonalAnalysisModal({ open, setOpen, shortUrl }: UrlProps) {
                                 </div>
 
                             </div>
-                            <Button onClick={fetchUrlAnalytics} className='cursor-pointer bg-purple-900 text-white'>
+                            <Button onClick={fetchUrlAnalyticsofPersional} className='cursor-pointer bg-purple-900 text-white'>
                                 <Calendar className="mr-2" /> Fetch Analytics
                             </Button>
                         </DialogDescription>

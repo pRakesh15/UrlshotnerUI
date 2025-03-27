@@ -57,7 +57,16 @@ export default function UrlCard({
       <div className="flex flex-col space-y-2">
         <div>#{id ?? "N/A"}</div>
         <div className="flex items-center">
-          <h3 className="text-blue-600 font-medium">{fullShortUrl}</h3>
+          <h3 className="text-blue-600 font-medium">
+          <a 
+    href={`http://localhost:8080/${sortUrl}`} 
+    target="_blank" 
+    rel="noopener noreferrer"
+    className="text-blue-600 font-medium hover:underline"
+  >
+    {fullShortUrl}
+  </a>
+    </h3>
           <ExternalLink className="h-4 w-4 ml-2 text-blue-600" />
         </div>
         <div className="text-gray-600">{originalUrl}</div>
