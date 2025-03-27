@@ -18,10 +18,10 @@ import {
   Legend,
   ResponsiveContainer
 } from 'recharts'
-import { Calendar, Link } from 'lucide-react'
+import { Calendar, Home, Link as Link1 } from 'lucide-react'
 import { Button } from "../ui/button"
 import { useContextStore } from '@/Context/ContextApi'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate,Link } from 'react-router-dom'
 import axios from 'axios'
 import { baseUrl } from '@/main'
 import {
@@ -194,7 +194,11 @@ const UrlAnalyticsDashboard: React.FC = () => {
     <div className="container mx-auto p-6 bg-gray-50 min-h-screen">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold flex items-center">
-          <Link className="mr-2" /> URL Analytics Dashboard
+          <Link1 className="mr-2" /> URL Analytics Dashboard
+        </h1>
+        <h1 className='flex'>
+        
+        <Home/> <Link to="/">Home</Link>
         </h1>
         <div className="flex items-center space-x-4">
           <div className="flex items-center space-x-2">

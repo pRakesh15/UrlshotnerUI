@@ -5,6 +5,7 @@ import Home from './Components/Pages/Home';
 import Login from './Components/Pages/Login';
 import UrlAnalyticsDashboard from './Components/Pages/UrlAnalyticsDashboard';
 import ProtectedRoute from './ProtectedRoute';
+import NotFoundPage from './Components/SubComponents/NotFoundPage';
 function App() {
 
   return (
@@ -16,6 +17,7 @@ function App() {
       <Route element={<ProtectedRoute/>}>
       <Route path='/dashBoard' element={<UrlAnalyticsDashboard/>}/>
       </Route>
+      <Route path='*' element={<NotFoundPage/>}/>
     </Routes>
      
     </>

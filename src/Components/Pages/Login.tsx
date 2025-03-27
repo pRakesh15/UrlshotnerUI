@@ -44,7 +44,7 @@ const Login = () => {
       localStorage.setItem("AUTH_TOKEN",JSON.stringify(response?.data?.token))
       setToken(JSON.stringify(response?.data?.token));
       toast.success("User Login successfully !!!")
-        navigate("/");
+        navigate("/dashBoard");
         
   
       } catch (error:any) {

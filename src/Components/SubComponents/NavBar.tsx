@@ -1,6 +1,6 @@
 import { useContextStore } from "@/Context/ContextApi";
 import { LinkIcon, LogOut, User } from "lucide-react"
-import { Link } from "react-router-dom"
+import { Link,useNavigate } from "react-router-dom"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,7 +14,17 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
 
 function NavBar() {
-  const { token } = useContextStore();
+  const { token,setToken } = useContextStore();
+  const navigate=useNavigate();
+
+  //function for logout user
+
+  const logOutHandler=()=>{
+    setToken(null);
+    localStorage.removeItem("AUTH_TOKEN");
+    navigate("/");
+    // console.log("user log out")
+  }
 
   return (
     <div>
@@ -41,7 +51,7 @@ function NavBar() {
                 <div className="ml-auto flex items-center space-x-4 cursor-pointer">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                      <Button variant="ghost" className="relative h-8 w-8 rounded-full cursor-pointer">
                         <Avatar className="h-8 w-8">
                           <AvatarImage src="/placeholder.svg?height=32&width=32" alt="User" />
                           <AvatarFallback>
@@ -50,7 +60,7 @@ function NavBar() {
                         </Avatar>
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-56" align="end" forceMount>
+                    <DropdownMenuContent className="w-56 bg-white" align="end" forceMount>
                       <DropdownMenuLabel className="font-normal">
                         <div className="flex flex-col space-y-1">
                           <p className="text-sm font-medium leading-none">User</p>
@@ -60,7 +70,7 @@ function NavBar() {
                       <DropdownMenuSeparator />
                       <DropdownMenuItem >
                         <LogOut className="mr-2 h-4 w-4" />
-                        <span>Log out</span>
+                        <span className="cursor-pointer" onClick={logOutHandler}>Log out</span>
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
